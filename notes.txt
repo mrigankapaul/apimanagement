@@ -1,0 +1,88 @@
+What is API management
+    - Sharable
+    - Secure
+    - Manage APIs
+Why API management
+    - Package and pubish APIs to developers and partners
+    - On-board developers via self service portal
+    - Ramp up developers with docs, samples and API console
+    - Build an API facade for existing backend services
+    - Add new capabilites to the APIs such as response caching
+    - Reliably protect published APIs from misuse and abuse.
+    - Throttle rate limit
+    - Gain Insights insights into API usage and health from analytics reports
+
+What is Azure API management
+    - Is a proxy between back end service and calling application
+    - It provides the publisher portal.
+    - It provides a developer portal.(Brand the developer portal)
+
+
+////////////
+
+Product -> Add the API -> Access Control -> Guest -> Subscription -> Yes, Published
+In Developers Portal -> Subscribe to the product then subscription key is added to the API by default.
+
+
+Policies could be applied to Global, Product, API or an operation
+
+Self Hosted gateway allows you to run gateways with docker and kubernetes
+
+
+// Applying Cache Policies
+<policies>
+    <inbound>
+        <base />
+        <set-backend-service id="apim-generated-policy" backend-id="linkedinprofile-mp" />
+        <authentication-managed-identity resource="https://linkedinprofile-mp.azurewebsites.net" />
+        <cache-lookup vary-by-developer="false" vary-by-developer-groups="false" downstream-caching-type="private" caching-type="internal" />
+        <cache-lookup-value key="@(context.Request.Headers.GetValueOrDefault("header","NONE"))" variable-name="context.Request" />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+        <cache-store duration="60" />
+        <cache-store-value key="key" value="value" duration="100000" />
+        <cache-remove-value key="key" />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
+
+//////// Transformational Policies
+
+<policies>
+    <inbound>
+        <base />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+        <set-header name="x-aspnet-version" exists-action="delete" />
+        <set-header name="x-powered-by" exists-action="delete" />
+        <redirect-content-urls />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
+
+
+
+
+//// Azure Networking /////
+
+if ($PSVersionTable.PSEdition -eq 'Desktop' -and (Get-Module -Name AzureRM -ListAvailable)) {
+    Write-Warning -Message ('Az module not installed. Having both the AzureRM and ' +
+      'Az modules installed at the same time is not supported.')
+} else {
+    Install-Module -Name Az -AllowClobber -Scope CurrentUser
+}
+
+# Connect to Azure with a browser sign in token
+Uninstall-AzureRm
